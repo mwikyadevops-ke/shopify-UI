@@ -1,0 +1,129 @@
+/* Mobile responsive styles for SaleCreate modal */
+@media (max-width: 768px) {
+  .summary-section,
+  .payment-section {
+    padding: 14px !important;
+    margin-top: 18px !important;
+  }
+
+  .summary-section h3,
+  .payment-section h3 {
+    font-size: 15px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .balance-display {
+    padding: 10px !important;
+    margin-top: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-section,
+  .payment-section {
+    padding: 12px !important;
+    margin-top: 14px !important;
+  }
+
+  .summary-section h3,
+  .payment-section h3 {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .balance-display {
+    padding: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  /* Reduce spacing in grid layouts */
+  .form-grid {
+    gap: 10px !important;
+  }
+
+  /* Reduce item card padding */
+  .sale-item-card {
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Reduce spacing in item grids - stack vertically on mobile */
+  .sale-item-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Stack item inputs vertically on mobile */
+  .sale-item-grid .input-group {
+    margin-bottom: 8px;
+  }
+
+  /* Make remove button smaller on mobile */
+  button[title="Remove item"] {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
+    margin-top: 0 !important;
+    align-self: flex-start;
+  }
+
+  /* Reduce text sizes in summary */
+  .summary-section span,
+  .payment-section span {
+    font-size: 13px !important;
+  }
+
+  .summary-section strong,
+  .payment-section strong {
+    font-size: 14px !important;
+  }
+
+  /* Stack payment method grid on mobile */
+  .payment-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Reduce summary grid spacing on mobile */
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .summary-section,
+  .payment-section {
+    padding: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  .summary-section h3,
+  .payment-section h3 {
+    font-size: 13px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .balance-display {
+    padding: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  button[title="Remove item"] {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    margin-top: 0 !important;
+  }
+
+  /* Reduce item grid columns on extra small */
+  .sale-item-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+
+  /* Make inputs even more compact */
+  .sale-item-grid .input-group {
+    margin-bottom: 6px;
+  }
+}

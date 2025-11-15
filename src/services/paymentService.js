@@ -1,0 +1,25 @@
+import api from './api';
+
+export const paymentService = {
+  getAll: async (params = {}) => {
+    const response = await api.get('/payments', { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/payments/${id}`);
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post('/payments', data);
+    return response.data;
+  },
+
+  refund: async (id, data = {}) => {
+    const response = await api.put(`/payments/${id}/refund`, data);
+    return response.data;
+  },
+};
+
+

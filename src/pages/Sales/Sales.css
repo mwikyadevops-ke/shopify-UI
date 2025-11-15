@@ -1,0 +1,108 @@
+.sales-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.sale-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sale-status-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.sale-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sale-status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sale-status-refunded {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.payment-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.payment-indicator.paid {
+  color: #10b981;
+}
+
+.payment-indicator.partial {
+  color: #f59e0b;
+}
+
+.payment-indicator.unpaid {
+  color: #ef4444;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sales-filters {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-group {
+    min-width: 100%;
+  }
+
+  .sales-filters select,
+  .sales-filters input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sales-filters {
+    gap: 10px;
+    padding: 12px;
+  }
+}

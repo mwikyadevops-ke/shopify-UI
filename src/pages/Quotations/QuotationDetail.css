@@ -1,0 +1,88 @@
+.quotation-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #111827;
+  font-size: 14px;
+  text-align: right;
+}
+
+.quotation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quotation-table thead {
+  background: #f3f4f6;
+}
+
+.quotation-table th {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+}
+
+.quotation-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.quotation-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.quotation-status-draft {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.quotation-status-sent {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.quotation-status-accepted {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.quotation-status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.quotation-status-expired {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.quotation-status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+

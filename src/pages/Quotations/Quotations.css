@@ -1,0 +1,15 @@
+.quotations-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.quotations-filters input {
+  flex: 1;
+}
+
+.quotations-filters select {
+  min-width: 150px;
+}
+

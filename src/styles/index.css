@@ -1,0 +1,374 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.page-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Mobile Responsive - Global Styles */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .page-container {
+    padding: 16px;
+    border-radius: 4px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 8px;
+  }
+
+  .page-container {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 18px;
+  }
+}
+
+.form-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-container-modal {
+  max-width: 100%;
+  width: 100%;
+  padding: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* Ensure forms in modals don't add extra width */
+.form-container-modal form {
+  width: 100%;
+  max-width: 100%;
+}
+
+.form-container-modal .user-form {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Tablet styles for forms inside modals */
+@media (max-width: 768px) {
+  .form-container-modal .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-container-modal .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .form-container-modal .form-actions {
+    gap: 10px;
+    margin-top: 18px;
+  }
+}
+
+/* Mobile styles for forms inside modals */
+@media (max-width: 480px) {
+  .form-container-modal {
+    padding: 0;
+    margin: 0;
+  }
+
+  .form-container-modal .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-container-modal .form-group label {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .form-container-modal .form-group input,
+  .form-container-modal .form-group select,
+  .form-container-modal .form-group textarea {
+    font-size: 16px;
+    padding: 10px 12px;
+    min-height: 42px;
+  }
+
+  .form-container-modal .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-container-modal .form-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .form-container-modal .form-actions button {
+    width: 100%;
+    margin: 0;
+    min-height: 44px;
+  }
+
+  .form-container-modal h3 {
+    font-size: 16px;
+    margin-top: 16px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Extra Small Mobile styles for forms inside modals */
+@media (max-width: 360px) {
+  .form-container-modal .form-group {
+    margin-bottom: 10px;
+  }
+
+  .form-container-modal .form-group label {
+    font-size: 12px;
+  }
+
+  .form-container-modal .form-group input,
+  .form-container-modal .form-group select,
+  .form-container-modal .form-group textarea {
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  .form-container-modal .form-grid {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .form-container-modal .form-actions {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .form-container-modal .form-actions button {
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  .form-container-modal h3 {
+    font-size: 15px;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 16px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 12px;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #e74c3c;
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-suspended {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-discontinued {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
