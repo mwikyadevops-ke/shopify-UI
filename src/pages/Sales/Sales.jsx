@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { saleService } from '../../services/saleService';
@@ -14,6 +14,15 @@ const Sales = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showSaleModal, setShowSaleModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { data, isLoading } = useQuery(
     ['sales', page, statusFilter],
@@ -43,7 +52,7 @@ const Sales = () => {
     }
   };
 
-  const columns = [
+  const allColumns = [
     { 
       key: 'sale_number', 
       label: 'Sale #',
@@ -191,6 +200,48 @@ const Sales = () => {
       },
     },
   ];
+
+  // Filter columns for mobile - show only: Date, Items, Amount, Shop
+  const columns = useMemo(() => {
+    if (isMobile) {
+      // Create mobile-specific column order: Date, Items, Amount, Shop, Actions
+      const mobileColumnOrder = ['sale_date', 'items_count', 'total_amount', 'shop_name', 'actions'];
+      const mobileColumns = [];
+      
+      mobileColumnOrder.forEach(key => {
+        const col = allColumns.find(c => c.key === key);
+        if (col) {
+          // Simplify date display for mobile
+          if (key === 'sale_date') {
+            mobileColumns.push({
+              ...col,
+              render: (value, row) => {
+                if (!row && !value) return '-';
+                const dateValue = row?.sale_date || value;
+                if (!dateValue) return '-';
+                try {
+                  const date = new Date(dateValue);
+                  if (isNaN(date.getTime())) return '-';
+                  return date.toLocaleDateString('en-KE', { 
+                    day: '2-digit', 
+                    month: 'short',
+                    year: 'numeric'
+                  });
+                } catch (e) {
+                  return '-';
+                }
+              }
+            });
+          } else {
+            mobileColumns.push(col);
+          }
+        }
+      });
+      
+      return mobileColumns;
+    }
+    return allColumns;
+  }, [isMobile]);
 
   // Filter data client-side for search
   const filteredData = useMemo(() => {

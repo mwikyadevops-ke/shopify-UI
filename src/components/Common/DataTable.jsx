@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import './DataTable.css';
 
 const DataTable = ({ 
@@ -20,6 +20,15 @@ const DataTable = ({
   const [currentPage, setCurrentPage] = useState(pagination?.page || 1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Handle sorting
   const handleSort = (key) => {
@@ -214,73 +223,127 @@ const DataTable = ({
         </div>
       ) : (
         <>
-          {/* Table */}
+          {/* Desktop Table View */}
           <div className="data-table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              {columns.map((col) => {
-                const isSortable = col.sortable !== false && (onSort || true);
-                const isSorted = sortConfig.key === col.key;
-                
-                return (
-                  <th 
-                    key={col.key}
-                    className={isSortable ? 'sortable' : ''}
-                    onClick={() => isSortable && handleSort(col.key)}
-                    style={{ cursor: isSortable ? 'pointer' : 'default' }}
-                  >
-                    <div className="th-content">
-                      <span>{col.label}</span>
-                      {isSortable && (
-                        <span className="sort-indicator">
-                          {isSorted ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '⇅'}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {currentPageData.map((row, index) => (
-              <tr key={row.id || index}>
-                {columns.map((col) => {
-                  const value = row[col.key];
-                  if (col.render) {
-                    const result = col.render(value, row);
-                    if (result && typeof result === 'object' && !React.isValidElement(result)) {
+            <table>
+              <thead>
+                <tr>
+                  {columns.map((col) => {
+                    const isSortable = col.sortable !== false && (onSort || true);
+                    const isSorted = sortConfig.key === col.key;
+                    
+                    return (
+                      <th 
+                        key={col.key}
+                        className={isSortable ? 'sortable' : ''}
+                        onClick={() => isSortable && handleSort(col.key)}
+                        style={{ cursor: isSortable ? 'pointer' : 'default' }}
+                      >
+                        <div className="th-content">
+                          <span>{col.label}</span>
+                          {isSortable && (
+                            <span className="sort-indicator">
+                              {isSorted ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '⇅'}
+                            </span>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {currentPageData.map((row, index) => (
+                  <tr key={row.id || index}>
+                    {columns.map((col) => {
+                      const value = row[col.key];
+                      if (col.render) {
+                        const result = col.render(value, row);
+                        if (result && typeof result === 'object' && !React.isValidElement(result)) {
+                          return (
+                            <td key={col.key}>
+                              {String(result)}
+                            </td>
+                          );
+                        }
+                        return (
+                          <td key={col.key}>
+                            {result}
+                          </td>
+                        );
+                      }
+                      if (value && typeof value === 'object' && !React.isValidElement(value)) {
+                        return (
+                          <td key={col.key}>
+                            {JSON.stringify(value)}
+                          </td>
+                        );
+                      }
                       return (
                         <td key={col.key}>
-                          {String(result)}
+                          {value != null ? value : '-'}
                         </td>
                       );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          {isMobile && (
+            <div className="data-table-mobile-cards">
+              {currentPageData.map((row, index) => (
+                <div key={row.id || index} className="data-table-mobile-card">
+                  {columns
+                    .filter(col => col.key !== 'actions')
+                    .map((col) => {
+                      const value = row[col.key];
+                      let displayValue;
+                      
+                      if (col.render) {
+                        const result = col.render(value, row);
+                        if (React.isValidElement(result)) {
+                          displayValue = result;
+                        } else if (result && typeof result === 'object') {
+                          displayValue = String(result);
+                        } else {
+                          displayValue = result || '-';
+                        }
+                      } else if (value && typeof value === 'object' && !React.isValidElement(value)) {
+                        displayValue = JSON.stringify(value);
+                      } else {
+                        displayValue = value != null ? value : '-';
+                      }
+
+                      return (
+                        <div key={col.key} className="mobile-card-row">
+                          <div className="mobile-card-label">{col.label}</div>
+                          <div className="mobile-card-value">{displayValue}</div>
+                        </div>
+                      );
+                    })}
+                  
+                  {/* Actions */}
+                  {(() => {
+                    const actionsCol = columns.find(col => col.key === 'actions');
+                    if (actionsCol && actionsCol.render) {
+                      const actions = actionsCol.render(null, row);
+                      if (React.isValidElement(actions)) {
+                        return (
+                          <div className="mobile-card-actions">
+                            {actions}
+                          </div>
+                        );
+                      }
                     }
-                    return (
-                      <td key={col.key}>
-                        {result}
-                      </td>
-                    );
-                  }
-                  if (value && typeof value === 'object' && !React.isValidElement(value)) {
-                    return (
-                      <td key={col.key}>
-                        {JSON.stringify(value)}
-                      </td>
-                    );
-                  }
-                  return (
-                    <td key={col.key}>
-                      {value != null ? value : '-'}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    return null;
+                  })()}
+                </div>
+              ))}
+            </div>
+          )}
 
       {/* Pagination */}
       {(pagination || processedData.length > itemsPerPage) && (

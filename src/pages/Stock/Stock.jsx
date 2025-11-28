@@ -13,6 +13,15 @@ const Stock = () => {
   const [selectedShop, setSelectedShop] = useState('');
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Check if user is admin or manager
   const isAdminOrManager = useMemo(() => {
@@ -91,7 +100,7 @@ const Stock = () => {
   }, [stock, searchTerm]);
 
   // Define columns - include shop name when showing all shops
-  const columns = useMemo(() => {
+  const allColumns = useMemo(() => {
     const baseColumns = [
       { key: 'product_name', label: 'Product' },
       { key: 'sku', label: 'SKU' },
@@ -126,6 +135,38 @@ const Stock = () => {
 
     return baseColumns;
   }, [shouldFetchAllStock, selectedShop, isAdminOrManager]);
+
+  // Filter columns for mobile - show only: Product Name, Shop, Quantity
+  const columns = useMemo(() => {
+    if (isMobile) {
+      // Mobile column order: Product Name, Shop, Quantity
+      const mobileColumns = [];
+      
+      // Always add product_name
+      const productCol = allColumns.find(c => c.key === 'product_name');
+      if (productCol) {
+        mobileColumns.push(productCol);
+      }
+      
+      // Add shop_name if available (either in allColumns or if we're viewing all shops)
+      const shopCol = allColumns.find(c => c.key === 'shop_name');
+      if (shopCol) {
+        mobileColumns.push(shopCol);
+      } else if (shouldFetchAllStock || (!selectedShop && isAdminOrManager)) {
+        // Add shop column even if not in allColumns when viewing all shops
+        mobileColumns.push({ key: 'shop_name', label: 'Shop' });
+      }
+      
+      // Always add quantity
+      const quantityCol = allColumns.find(c => c.key === 'quantity');
+      if (quantityCol) {
+        mobileColumns.push(quantityCol);
+      }
+      
+      return mobileColumns;
+    }
+    return allColumns;
+  }, [isMobile, allColumns, shouldFetchAllStock, selectedShop, isAdminOrManager]);
 
   return (
     <div className="page-container">

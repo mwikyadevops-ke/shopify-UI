@@ -21,6 +21,7 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
       items: [{ product_id: '', quantity: 1, unit_price: 0, discount: 0 }],
       tax_amount: 0,
       discount_amount: 0,
+      apply_vat: false,
       payment_method: 'cash',
       amount_paid: 0,
     },
@@ -32,6 +33,7 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
   const taxAmount = watch('tax_amount') || 0;
   const discountAmount = watch('discount_amount') || 0;
   const amountPaid = watch('amount_paid') || 0;
+  const applyVat = watch('apply_vat') || false;
   
   // Store payment data temporarily to use after sale creation
   const pendingPaymentData = useRef(null);
@@ -105,6 +107,25 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
       });
     }
   }, [shopId, stockItems, fields, watch, setValue]);
+
+  // Auto-calculate VAT when checkbox is toggled or subtotal changes
+  useEffect(() => {
+    const subtotal = items.reduce((sum, item) => {
+      const quantity = parseFloat(item.quantity || 0);
+      const unitPrice = parseFloat(item.unit_price || 0);
+      const itemDiscount = parseFloat(item.discount || 0);
+      const itemTotal = (quantity * unitPrice) - itemDiscount;
+      return sum + itemTotal;
+    }, 0);
+
+    if (applyVat) {
+      const vatAmount = subtotal * 0.16;
+      setValue('tax_amount', vatAmount);
+    } else {
+      // Clear tax when VAT checkbox is unchecked
+      setValue('tax_amount', 0);
+    }
+  }, [applyVat, items, setValue]);
 
   // Calculate totals dynamically
   const calculateTotals = useMemo(() => {
@@ -302,7 +323,8 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
 
           return (
             <div key={field.id} className="sale-item-card" style={{ border: '1px solid #ddd', padding: '10px', marginBottom: '10px', borderRadius: '4px' }}>
-              <div className="form-group">
+              {/* Product Selection Row */}
+              <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label>Product</label>
                 <select 
                   {...register(`items.${index}.product_id`, { 
@@ -311,6 +333,15 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                       handleProductChange(index, e.target.value);
                     }
                   })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    border: errors.items?.[index]?.product_id ? '1px solid #ef4444' : '1px solid #d1d5db',
+                    fontSize: '14px',
+                    backgroundColor: '#fff',
+                    cursor: 'pointer',
+                  }}
                 >
                   <option value="">Select Product</option>
                   {productsLoading ? (
@@ -352,8 +383,15 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                     Available: {availableStock} {availableStock === 0 && '- Out of Stock'}
                   </span>
                 )}
+                {errors.items?.[index]?.product_id && (
+                  <span style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
+                    {errors.items[index].product_id.message || 'Product is required'}
+                  </span>
+                )}
               </div>
-              <div className="sale-item-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '10px', alignItems: 'end' }}>
+              
+              {/* Quantity, Price, Discount, Amount Row */}
+              <div className="sale-item-grid" style={{ display: 'grid', gridTemplateColumns: index === 0 ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr 1fr auto', gap: '10px', alignItems: 'start' }}>
                 <Input 
                   label="Quantity" 
                   type="number" 
@@ -368,6 +406,9 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                         return Number(value) <= availableStock || `Quantity cannot exceed available stock (${availableStock})`;
                       }
                       return true;
+                    },
+                    onChange: () => {
+                      // Trigger recalculation
                     }
                   })}
                   error={errors.items?.[index]?.quantity}
@@ -383,6 +424,9 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                     min: {
                       value: 0,
                       message: 'Unit price must be 0 or greater'
+                    },
+                    onChange: () => {
+                      // Trigger recalculation
                     }
                   })} 
                   error={errors.items?.[index]?.unit_price}
@@ -396,45 +440,75 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                     min: {
                       value: 0,
                       message: 'Discount cannot be negative'
+                    },
+                    onChange: () => {
+                      // Trigger recalculation
                     }
                   })} 
                   error={errors.items?.[index]?.discount}
                 />
-                <button
-                  type="button"
-                  onClick={() => remove(index)}
-                  title="Remove item"
-                  style={{
-                    height: '42px',
-                    width: '42px',
-                    padding: 0,
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '5px', display: 'block' }}>Amount</label>
+                  <div style={{ 
+                    padding: '10px 12px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #d1d5db',
+                    backgroundColor: '#f9fafb',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#059669',
+                    minHeight: '42px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#fee2e2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '6px',
-                    color: '#dc2626',
-                    cursor: 'pointer',
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    transition: 'all 0.2s',
-                    marginTop: '24px',
-                    lineHeight: 1
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fecaca';
-                    e.currentTarget.style.borderColor = '#f87171';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fee2e2';
-                    e.currentTarget.style.borderColor = '#fecaca';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  ×
-                </button>
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}>
+                    Ksh {(() => {
+                      const quantity = parseFloat(watch(`items.${index}.quantity`) || 0);
+                      const unitPrice = parseFloat(watch(`items.${index}.unit_price`) || 0);
+                      const discount = parseFloat(watch(`items.${index}.discount`) || 0);
+                      const amount = (quantity * unitPrice) - discount;
+                      return amount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    })()}
+                  </div>
+                </div>
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    title="Remove item"
+                    style={{
+                      height: '42px',
+                      width: '42px',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#fee2e2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '6px',
+                      color: '#dc2626',
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      transition: 'all 0.2s',
+                      lineHeight: 1,
+                      marginTop: '24px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fecaca';
+                      e.currentTarget.style.borderColor = '#f87171';
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fee2e2';
+                      e.currentTarget.style.borderColor = '#fecaca';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -443,7 +517,24 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
           Add Item
         </Button>
 
-        <Input label="Tax Amount" type="number" step="0.01" {...register('tax_amount', { valueAsNumber: true })} />
+        <div className="form-group" style={{ marginTop: '16px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              {...register('apply_vat')}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '16px', fontWeight: '500' }}>Apply 16% VAT</span>
+          </label>
+        </div>
+        <Input 
+          label="Tax Amount" 
+          type="number" 
+          step="0.01" 
+          {...register('tax_amount', { valueAsNumber: true })} 
+          disabled={applyVat}
+          style={applyVat ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
+        />
         <Input label="Discount Amount" type="number" step="0.01" {...register('discount_amount', { valueAsNumber: true })} />
 
         {/* Summary Section */}
@@ -546,6 +637,9 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
                     return `Amount paid cannot exceed total amount (Ksh ${total.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
                   }
                   return true;
+                },
+                onChange: () => {
+                  // Trigger balance recalculation
                 }
               })}
               error={errors.amount_paid}

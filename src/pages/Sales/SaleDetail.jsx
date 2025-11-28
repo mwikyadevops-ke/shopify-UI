@@ -529,16 +529,18 @@ const SaleDetail = () => {
     <div className="page-container">
       <div className="sale-detail-container">
         {/* Action Buttons at the Top */}
-        <div style={{ 
+        <div className="sale-detail-actions" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: '20px',
           paddingBottom: '16px',
-          borderBottom: '1px solid #e5e7eb'
+          borderBottom: '1px solid #e5e7eb',
+          gap: '12px',
+          flexWrap: 'wrap'
         }}>
           <Button onClick={() => navigate('/sales')} variant="secondary">Back</Button>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: '1', justifyContent: 'flex-end' }}>
             {balanceDue > 0 && (
               <Button 
                 onClick={() => navigate(`/payments/new?sale_id=${sale.id}`)}
@@ -664,7 +666,8 @@ const SaleDetail = () => {
 
         <div className="items-table-container">
           <h3>Items ({sale.items?.length || 0})</h3>
-          <table className="sale-table">
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table className="sale-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -703,12 +706,14 @@ const SaleDetail = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {sale.payments && sale.payments.length > 0 && (
           <div className="payments-table-container">
             <h3>Payments ({sale.payments.length})</h3>
-            <table className="sale-table">
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table className="sale-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -755,6 +760,7 @@ const SaleDetail = () => {
                 </tr>
               </tfoot>
             </table>
+            </div>
           </div>
         )}
 
