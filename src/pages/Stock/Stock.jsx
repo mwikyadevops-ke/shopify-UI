@@ -173,8 +173,13 @@ const Stock = () => {
       <div className="page-header">
         <h1>Stock Management</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button onClick={() => navigate('/stock/add')}>Add Stock</Button>
-          <Button onClick={() => navigate('/stock/adjust')}>Adjust Stock</Button>
+          {/* Add Stock and Adjust Stock - Admin/Manager only */}
+          {isAdminOrManager && (
+            <>
+              <Button onClick={() => navigate('/stock/add')}>Add Stock</Button>
+              <Button onClick={() => navigate('/stock/adjust')}>Adjust Stock</Button>
+            </>
+          )}
           <Button onClick={() => navigate('/stock/transactions')}>View Transactions</Button>
         </div>
       </div>

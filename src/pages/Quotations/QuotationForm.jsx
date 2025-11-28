@@ -2,17 +2,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { quotationService } from '../../services/quotationService';
 import { shopService } from '../../services/shopService';
 import toast from 'react-hot-toast';
 import Button from '../../components/Common/Button';
 import Input from '../../components/Common/Input';
+import './QuotationForm.css';
 
 const QuotationForm = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const isEdit = !!id;
+  const { user, currentShop } = useAuth();
 
   const { register, handleSubmit, control, formState: { errors }, watch, setValue, reset } = useForm({
     defaultValues: {
@@ -34,8 +37,41 @@ const QuotationForm = () => {
   const items = watch('items');
   const applyTax = watch('apply_tax');
   const discountAmount = watch('discount_amount') || 0;
+  const shopId = watch('shop_id');
+
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
 
   const { data: shops } = useQuery('shops', () => shopService.getAll({ limit: 100 }));
+
+  // Filter shops based on user role
+  const shopsList = useMemo(() => {
+    const allShops = shops?.data || [];
+    if (isAdminOrManager) {
+      return allShops;
+    } else {
+      // Staff can only see their shop
+      if (userShopId) {
+        return allShops.filter(shop => shop.id === userShopId);
+      }
+      return [];
+    }
+  }, [shops, isAdminOrManager, userShopId]);
+
+  // Auto-set shop_id for staff on mount
+  useEffect(() => {
+    if (!isEdit && !isAdminOrManager && userShopId && !shopId) {
+      setValue('shop_id', String(userShopId));
+    }
+  }, [isEdit, isAdminOrManager, userShopId, shopId, setValue]);
   
   // Fetch quotation if editing
   const { data: quotationData, isLoading: quotationLoading } = useQuery(
@@ -153,7 +189,6 @@ const QuotationForm = () => {
       return item;
     });
 
-    console.log('📋 Quotation data:', quotationData);
     mutation.mutate(quotationData);
   };
 
@@ -162,19 +197,13 @@ const QuotationForm = () => {
   }
 
   return (
-    <div className="form-container">
+    <div className="quotation-form-container">
       <h1>{isEdit ? 'Edit Quotation' : 'Create Quotation'}</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Supplier Information */}
-        <div style={{ 
-          marginBottom: '24px', 
-          padding: '20px', 
-          background: '#f9fafb', 
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '16px', color: '#374151' }}>Supplier Information</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="quotation-form-section">
+          <h3>Supplier Information</h3>
+          <div className="quotation-form-grid">
             <Input
               label="Supplier Name *"
               {...register('supplier_name', { required: 'Supplier name is required' })}
@@ -186,8 +215,6 @@ const QuotationForm = () => {
               {...register('supplier_email')}
               error={errors.supplier_email}
             />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
             <Input
               label="Supplier Phone"
               {...register('supplier_phone')}
@@ -195,18 +222,40 @@ const QuotationForm = () => {
             />
             <div className="form-group">
               <label>Shop (Optional)</label>
-              <select {...register('shop_id')}>
-                <option value="">All Shops</option>
-                {shops?.data?.map((shop) => (
-                  <option key={shop.id} value={shop.id}>
-                    {shop.name}
-                  </option>
-                ))}
-              </select>
+              {!isAdminOrManager && userShopId ? (
+                // Staff sees their shop only (disabled)
+                <select 
+                  {...register('shop_id')}
+                  disabled
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '14px',
+                    backgroundColor: '#f9fafb',
+                    cursor: 'not-allowed'
+                  }}
+                >
+                  {shopsList.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                // Admin/Manager can select shop
+                <select {...register('shop_id')}>
+                  <option value="">All Shops</option>
+                  {shopsList.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-          </div>
-          <div style={{ marginTop: '16px' }}>
-            <div className="form-group">
+            <div className="form-group quotation-form-grid-full">
               <label>Supplier Address</label>
               <textarea {...register('supplier_address')} rows="3" placeholder="Supplier address..." />
             </div>
@@ -214,119 +263,113 @@ const QuotationForm = () => {
         </div>
 
         {/* Items */}
-        <h3>Items</h3>
-        {fields.map((field, index) => (
-          <div key={field.id} style={{ border: '1px solid #ddd', padding: '15px', marginBottom: '15px', borderRadius: '6px', background: '#fff' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
-              <Input
-                label="Item Name *"
-                {...register(`items.${index}.item_name`, { required: 'Item name is required' })}
-                error={errors.items?.[index]?.item_name}
-                placeholder="Enter item name"
-              />
-              <Input
-                label="Item SKU"
-                {...register(`items.${index}.item_sku`)}
-                error={errors.items?.[index]?.item_sku}
-                placeholder="SKU (optional)"
-              />
-            </div>
-            <div style={{ marginBottom: '16px' }}>
-              <div className="form-group">
-                <label>Item Description</label>
-                <textarea 
-                  {...register(`items.${index}.item_description`)} 
-                  rows="2"
-                  placeholder="Item description (optional)"
+        <div className="quotation-form-section">
+          <h3>Items</h3>
+          {fields.map((field, index) => (
+            <div key={field.id} className="quotation-item-card">
+              <div className="quotation-item-grid">
+                <Input
+                  label="Item Name *"
+                  {...register(`items.${index}.item_name`, { required: 'Item name is required' })}
+                  error={errors.items?.[index]?.item_name}
+                  placeholder="Enter item name"
+                />
+                <Input
+                  label="Item SKU"
+                  {...register(`items.${index}.item_sku`)}
+                  error={errors.items?.[index]?.item_sku}
+                  placeholder="SKU (optional)"
                 />
               </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
-              <Input
-                label="Quantity *"
-                type="number"
-                step="0.01"
-                {...register(`items.${index}.quantity`, { 
-                  required: 'Quantity is required',
-                  valueAsNumber: true,
-                  min: { value: 0.01, message: 'Quantity must be greater than 0' }
-                })}
-                error={errors.items?.[index]?.quantity}
-              />
-              <Input
-                label="Unit Price (Ksh) *"
-                type="number"
-                step="0.01"
-                {...register(`items.${index}.unit_price`, { 
-                  required: 'Unit price is required',
-                  valueAsNumber: true,
-                  min: { value: 0, message: 'Unit price must be 0 or greater' }
-                })}
-                error={errors.items?.[index]?.unit_price}
-              />
-              <Input
-                label="Discount (Ksh)"
-                type="number"
-                step="0.01"
-                {...register(`items.${index}.discount`, { 
-                  valueAsNumber: true,
-                  min: { value: 0, message: 'Discount cannot be negative' }
-                })}
-                error={errors.items?.[index]?.discount}
-              />
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>
-                  Total
-                </label>
-                <div style={{ 
-                  padding: '10px 12px', 
-                  background: '#f3f4f6', 
-                  borderRadius: '6px', 
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#059669'
-                }}>
-                  Ksh {(
-                    (parseFloat(watch(`items.${index}.quantity`) || 0) * parseFloat(watch(`items.${index}.unit_price`) || 0)) -
-                    parseFloat(watch(`items.${index}.discount`) || 0)
-                  ).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div style={{ marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label>Item Description</label>
+                  <textarea 
+                    {...register(`items.${index}.item_description`)} 
+                    rows="2"
+                    placeholder="Item description (optional)"
+                  />
                 </div>
               </div>
-              {fields.length > 1 && (
-                <Button 
-                  type="button" 
-                  onClick={() => remove(index)} 
-                  variant="danger"
-                  style={{ height: 'fit-content' }}
-                >
-                  Remove
-                </Button>
-              )}
+              <div className="quotation-item-details">
+                <Input
+                  label="Quantity *"
+                  type="number"
+                  step="0.01"
+                  {...register(`items.${index}.quantity`, { 
+                    required: 'Quantity is required',
+                    valueAsNumber: true,
+                    min: { value: 0.01, message: 'Quantity must be greater than 0' }
+                  })}
+                  error={errors.items?.[index]?.quantity}
+                />
+                <Input
+                  label="Unit Price (Ksh) *"
+                  type="number"
+                  step="0.01"
+                  {...register(`items.${index}.unit_price`, { 
+                    required: 'Unit price is required',
+                    valueAsNumber: true,
+                    min: { value: 0, message: 'Unit price must be 0 or greater' }
+                  })}
+                  error={errors.items?.[index]?.unit_price}
+                />
+                <Input
+                  label="Discount (Ksh)"
+                  type="number"
+                  step="0.01"
+                  {...register(`items.${index}.discount`, { 
+                    valueAsNumber: true,
+                    min: { value: 0, message: 'Discount cannot be negative' }
+                  })}
+                  error={errors.items?.[index]?.discount}
+                />
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                    Total
+                  </label>
+                  <div className="quotation-item-total">
+                    Ksh {(
+                      (parseFloat(watch(`items.${index}.quantity`) || 0) * parseFloat(watch(`items.${index}.unit_price`) || 0)) -
+                      parseFloat(watch(`items.${index}.discount`) || 0)
+                    ).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+                {fields.length > 1 && (
+                  <Button 
+                    type="button" 
+                    onClick={() => remove(index)} 
+                    variant="danger"
+                    style={{ height: 'fit-content', fontSize: '14px', padding: '8px 12px' }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        <Button type="button" onClick={() => append({ item_name: '', item_description: '', item_sku: '', quantity: 1, unit_price: 0, discount: 0 })}>
-          Add Item
-        </Button>
+          ))}
+          <Button 
+            type="button" 
+            onClick={() => append({ item_name: '', item_description: '', item_sku: '', quantity: 1, unit_price: 0, discount: 0 })}
+            variant="secondary"
+            style={{ fontSize: '14px', padding: '10px 16px' }}
+          >
+            + Add Item
+          </Button>
+        </div>
 
         {/* Summary Section */}
-        <div style={{ 
-          marginTop: '24px', 
-          padding: '20px', 
-          background: '#f9fafb', 
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '16px', color: '#374151' }}>Summary</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className="quotation-form-section">
+          <h3>Summary</h3>
+          <div className="quotation-summary-grid">
+            <div className="quotation-summary-row">
               <span style={{ color: '#6b7280', fontWeight: '500' }}>Subtotal:</span>
               <span style={{ fontWeight: '600' }}>
                 Ksh {calculateTotals.subtotal.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             {applyTax && calculateTotals.tax > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="quotation-summary-row">
                 <span style={{ color: '#6b7280', fontWeight: '500' }}>
                   Tax (16%):
                 </span>
@@ -336,20 +379,14 @@ const QuotationForm = () => {
               </div>
             )}
             {discountAmount > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="quotation-summary-row">
                 <span style={{ color: '#6b7280', fontWeight: '500' }}>Discount:</span>
                 <span style={{ fontWeight: '600', color: '#ef4444' }}>
                   - Ksh {parseFloat(discountAmount).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             )}
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              paddingTop: '12px',
-              borderTop: '2px solid #e5e7eb',
-              gridColumn: '1 / -1'
-            }}>
+            <div className="quotation-summary-total">
               <span style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>Total Amount:</span>
               <span style={{ fontSize: '20px', fontWeight: '700', color: '#059669' }}>
                 Ksh {calculateTotals.total.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -359,14 +396,8 @@ const QuotationForm = () => {
         </div>
 
         {/* VAT and Tax Section */}
-        <div style={{ 
-          marginTop: '24px', 
-          padding: '20px', 
-          background: '#f9fafb', 
-          borderRadius: '8px',
-          border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ marginTop: 0, marginBottom: '16px', color: '#374151' }}>Tax & Discount</h3>
+        <div className="quotation-form-section">
+          <h3>Tax & Discount</h3>
           
           <div className="form-group">
             <label>Apply 16% Tax</label>
@@ -375,11 +406,6 @@ const QuotationForm = () => {
               onChange={(e) => {
                 const value = e.target.value === 'true';
                 setValue('apply_tax', value);
-                // Clear tax calculation when tax is disabled
-                if (!value) {
-                  // No tax selected - ensure tax is 0
-                  // The calculateTotals will handle this, but we can explicitly clear it
-                }
               }}
               style={{
                 width: '100%',
@@ -416,7 +442,7 @@ const QuotationForm = () => {
           />
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+        <div className="quotation-form-grid" style={{ marginTop: '16px' }}>
           <Input
             label="Valid Until"
             type="date"
@@ -441,7 +467,7 @@ const QuotationForm = () => {
           <textarea {...register('notes')} rows="4" placeholder="Additional notes..." />
         </div>
 
-        <div className="form-actions">
+        <div className="quotation-form-actions">
           <Button type="submit" loading={mutation.isLoading}>
             {isEdit ? 'Update Quotation' : 'Create Quotation'}
           </Button>

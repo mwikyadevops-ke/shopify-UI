@@ -29,6 +29,7 @@ import Alerts from './pages/Alerts/Alerts';
 import Quotations from './pages/Quotations/Quotations';
 import QuotationForm from './pages/Quotations/QuotationForm';
 import QuotationDetail from './pages/Quotations/QuotationDetail';
+import Profile from './pages/Profile/Profile';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -67,7 +68,7 @@ function RoleProtectedRoute({ children, allowedRoles = [] }) {
   return children;
 }
 
-// Dashboard redirect - Staff goes to Stock, Admin/Manager to Dashboard
+// Dashboard redirect - All authenticated users can see Dashboard (with role-based content)
 function DashboardRedirect() {
   const { user, loading } = useAuth();
 
@@ -79,20 +80,8 @@ function DashboardRedirect() {
     return <Navigate to="/login" />;
   }
 
-  const userRole = user?.role?.toLowerCase();
-
-  // Staff users go to Stock page
-  if (userRole === 'staff') {
-    return <Navigate to="/stock" replace />;
-  }
-
-  // Admin and Manager see Dashboard
-  if (userRole === 'admin' || userRole === 'manager') {
-    return <Dashboard />;
-  }
-
-  // Default fallback
-  return <Navigate to="/stock" replace />;
+  // All authenticated users can see Dashboard
+  return <Dashboard />;
 }
 
 function App() {
@@ -127,10 +116,11 @@ function App() {
             </RoleProtectedRoute>
           } 
         />
+        {/* Add Shop - Admin only */}
         <Route 
           path="shops/new" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <ShopForm />
             </RoleProtectedRoute>
           } 
@@ -143,10 +133,11 @@ function App() {
             </RoleProtectedRoute>
           } 
         />
+        {/* Users - Admin only */}
         <Route 
           path="users" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <Users />
             </RoleProtectedRoute>
           } 
@@ -154,7 +145,7 @@ function App() {
         <Route 
           path="users/new" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <UserForm />
             </RoleProtectedRoute>
           } 
@@ -162,7 +153,7 @@ function App() {
         <Route 
           path="users/:id/edit" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <UserForm />
             </RoleProtectedRoute>
           } 
@@ -199,10 +190,11 @@ function App() {
             </RoleProtectedRoute>
           } 
         />
+        {/* Stock Transfers - Admin only */}
         <Route 
           path="stock-transfers" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <StockTransfers />
             </RoleProtectedRoute>
           } 
@@ -210,7 +202,7 @@ function App() {
         <Route 
           path="stock-transfers/new" 
           element={
-            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+            <RoleProtectedRoute allowedRoles={['admin']}>
               <StockTransferForm />
             </RoleProtectedRoute>
           } 
@@ -266,9 +258,25 @@ function App() {
         
         {/* Stock - All roles (admin, manager, staff) */}
         <Route path="stock" element={<Stock />} />
-        <Route path="stock/add" element={<StockAdd />} />
-        <Route path="stock/adjust" element={<StockAdjust />} />
         <Route path="stock/transactions" element={<StockTransactions />} />
+        
+        {/* Stock Add/Adjust - Admin/Manager only */}
+        <Route 
+          path="stock/add" 
+          element={
+            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+              <StockAdd />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="stock/adjust" 
+          element={
+            <RoleProtectedRoute allowedRoles={['admin', 'manager']}>
+              <StockAdjust />
+            </RoleProtectedRoute>
+          } 
+        />
         
         {/* Sales - All roles (admin, manager, staff) */}
         <Route path="sales" element={<Sales />} />
@@ -280,6 +288,9 @@ function App() {
         
         {/* Alerts - All roles (admin, manager, staff) */}
         <Route path="alerts" element={<Alerts />} />
+        
+        {/* Profile - All roles (admin, manager, staff) */}
+        <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </ErrorBoundary>

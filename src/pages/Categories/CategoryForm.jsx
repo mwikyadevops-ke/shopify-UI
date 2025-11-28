@@ -40,7 +40,6 @@ const CategoryForm = ({ categoryId, onSuccess, onCancel }) => {
             onError: (error) => {
                 const errorMessage = error.response?.data?.message || `Failed to ${isEdit ? 'update' : 'save'} category`;
                 toast.error(errorMessage);
-                console.error('Category save error:', error);
             },
         }
     );

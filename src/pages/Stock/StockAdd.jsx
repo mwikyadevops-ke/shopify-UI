@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { stockService } from '../../services/stockService';
 import { shopService } from '../../services/shopService';
 import { productService } from '../../services/productService';
@@ -12,6 +13,7 @@ import Input from '../../components/Common/Input';
 const StockAdd = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, currentShop } = useAuth();
   const { register, handleSubmit, formState: { errors }, watch, setValue, reset } = useForm({
     defaultValues: {
       min_stock_level: '',
@@ -20,6 +22,17 @@ const StockAdd = () => {
 
   const shopId = watch('shop_id');
   const productId = watch('product_id');
+
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
 
   const { data: shops, isLoading: shopsLoading } = useQuery(
     'shops', 
@@ -38,7 +51,20 @@ const StockAdd = () => {
     }
   );
 
-  const shopsList = shops?.data || [];
+  // Filter shops based on user role
+  const shopsList = useMemo(() => {
+    const allShops = shops?.data || [];
+    if (isAdminOrManager) {
+      return allShops;
+    } else {
+      // Staff can only see their shop
+      if (userShopId) {
+        return allShops.filter(shop => shop.id === userShopId);
+      }
+      return [];
+    }
+  }, [shops, isAdminOrManager, userShopId]);
+
   const productsList = products?.data || [];
 
   // Fetch selected product details to get default_min_stock_level
@@ -56,7 +82,6 @@ const StockAdd = () => {
     if (selectedProduct?.data?.default_min_stock_level !== undefined && productId) {
       const defaultMinLevel = selectedProduct.data.default_min_stock_level ?? 0;
       setValue('min_stock_level', defaultMinLevel);
-      console.log('✅ Auto-filled min_stock_level from product:', defaultMinLevel);
     }
   }, [selectedProduct, productId, setValue]);
 
@@ -96,7 +121,6 @@ const StockAdd = () => {
         delete submitData[key];
       }
     });
-    console.log('📦 StockAdd submit data:', submitData);
     mutation.mutate(submitData);
   };
 
@@ -114,7 +138,30 @@ const StockAdd = () => {
             <select id="shop_id" disabled className="warning" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
               <option>No shops available</option>
             </select>
+          ) : !isAdminOrManager && userShopId ? (
+            // Staff sees their shop only (disabled)
+            <select
+              id="shop_id"
+              {...register('shop_id', { required: 'Shop is required' })}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                backgroundColor: '#f9fafb',
+                cursor: 'not-allowed'
+              }}
+            >
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
           ) : (
+            // Admin/Manager can select shop
             <select
               id="shop_id"
               {...register('shop_id', { required: 'Shop is required' })}
@@ -126,17 +173,17 @@ const StockAdd = () => {
                 border: errors.shop_id ? '1px solid #ef4444' : '1px solid #d1d5db',
                 fontSize: '14px',
                 backgroundColor: '#fff',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
-              }}
-            >
-              <option value="">Select Shop</option>
-              {shopsList.map((shop) => (
-                <option key={shop.id} value={shop.id}>
-                  {shop.name}
-                </option>
-              ))}
-            </select>
+              cursor: 'pointer',
+              transition: 'border-color 0.2s, box-shadow 0.2s'
+            }}
+          >
+            <option value="">Select Shop</option>
+            {shopsList.map((shop) => (
+              <option key={shop.id} value={shop.id}>
+                {shop.name}
+              </option>
+            ))}
+          </select>
           )}
           {errors.shop_id && <span className="error-message">{errors.shop_id.message}</span>}
         </div>

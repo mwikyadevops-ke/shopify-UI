@@ -21,10 +21,7 @@ const CategoryList = () => {
         () => categoryService.getAll({ page, limit }),
         { 
             keepPreviousData: true,
-            retry: 2,
-            onError: (error) => {
-                console.error('Failed to fetch categories:', error);
-            }
+            retry: 2
         }
     );
 
@@ -50,7 +47,6 @@ const CategoryList = () => {
         onError: (error) => {
             const errorMessage = error.response?.data?.message || 'Failed to delete category';
             toast.error(errorMessage);
-            console.error('Delete category error:', error);
         },
     });
 

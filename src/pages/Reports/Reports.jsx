@@ -1,28 +1,51 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from 'react-query';
+import { useAuth } from '../../context/AuthContext';
 import { reportService } from '../../services/reportService';
 import DataTable from '../../components/Common/DataTable';
 import './Reports.css';
 
 const Reports = () => {
+  const { user, currentShop } = useAuth();
   const [reportType, setReportType] = useState('sales');
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
+
+  // Build filters with shop_id for staff
+  const effectiveFilters = useMemo(() => {
+    const baseFilters = { ...filters };
+    // Staff only sees their shop's reports
+    if (!isAdminOrManager && userShopId) {
+      baseFilters.shop_id = userShopId;
+    }
+    return baseFilters;
+  }, [filters, isAdminOrManager, userShopId]);
+
   const { data, isLoading } = useQuery(
-    ['report', reportType, filters],
+    ['report', reportType, effectiveFilters],
     () => {
       switch (reportType) {
         case 'sales':
-          return reportService.getSalesReport(filters);
+          return reportService.getSalesReport(effectiveFilters);
         case 'stock':
-          return reportService.getStockReport(filters);
+          return reportService.getStockReport(effectiveFilters);
         case 'products':
-          return reportService.getProductSalesReport(filters);
+          return reportService.getProductSalesReport(effectiveFilters);
         case 'payments':
-          return reportService.getPaymentReport(filters);
+          return reportService.getPaymentReport(effectiveFilters);
         default:
-          return reportService.getSalesReport(filters);
+          return reportService.getSalesReport(effectiveFilters);
       }
     }
   );

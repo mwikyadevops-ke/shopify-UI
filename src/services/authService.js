@@ -21,14 +21,7 @@ export const authService = {
     const trimmedEmail = (email || '').trim();
     const trimmedPassword = (password || '').trim();
     
-    console.log('🔐 Login attempt:', { 
-      email: trimmedEmail, 
-      passwordLength: trimmedPassword.length,
-      passwordPreview: trimmedPassword.substring(0, 2) + '***'
-    });
-    
     if (!trimmedEmail || !trimmedPassword) {
-      console.warn('⚠️ Login validation failed: Email or password is empty');
       return {
         success: false,
         message: 'Email and password are required.'
@@ -40,12 +33,10 @@ export const authService = {
         email: trimmedEmail, 
         password: trimmedPassword 
       });
-      console.log('✅ Login response:', response.data);
       // Backend returns accessToken and sets refreshToken as cookie
       // The refreshToken is automatically handled via cookies
       return response.data;
     } catch (error) {
-      console.error('❌ Login error:', error);
       // Re-throw so AuthContext can handle it
       throw error;
     }
@@ -53,14 +44,11 @@ export const authService = {
 
   refreshToken: async (refreshToken) => {
     try {
-      console.log('🔄 Refreshing token...');
       const response = await api.post('/users/refresh-token', {
         refreshToken: refreshToken
       });
-      console.log('✅ Token refresh successful');
       return response.data;
     } catch (error) {
-      console.error('❌ Token refresh error:', error);
       throw error;
     }
   },
@@ -76,11 +64,19 @@ export const authService = {
     return response.data;
   },
 
-  resetPassword: async (token, password, passwordConfirmation) => {
+  resetPassword: async (token, newPassword) => {
     const response = await api.post('/users/reset-password', {
       token,
-      password,
-      password_confirmation: passwordConfirmation,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    // Authorization header is automatically added by api interceptor
+    const response = await api.post('/users/change-password', {
+      currentPassword,
+      newPassword,
     });
     return response.data;
   },

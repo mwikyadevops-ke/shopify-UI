@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { quotationService } from '../../services/quotationService';
 import toast from 'react-hot-toast';
 import DataTable from '../../components/Common/DataTable';
@@ -13,6 +14,7 @@ import './Quotations.css';
 const Quotations = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, currentShop } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,17 @@ const Quotations = () => {
     quotationId: null,
     quotationData: null,
   });
+
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
 
   // Sync status filter with URL query parameter on mount
   useEffect(() => {
@@ -46,8 +59,14 @@ const Quotations = () => {
   };
 
   const { data, isLoading } = useQuery(
-    ['quotations', page, statusFilter],
-    () => quotationService.getAll({ page, limit: 10, status: statusFilter }),
+    ['quotations', page, statusFilter, userShopId],
+    () => quotationService.getAll({ 
+      page, 
+      limit: 10, 
+      status: statusFilter,
+      // Staff only sees their shop's quotations
+      ...(!isAdminOrManager && userShopId && { shop_id: userShopId })
+    }),
     { keepPreviousData: true }
   );
 

@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useForm } from 'react-hook-form';
+import { useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { stockService } from '../../services/stockService';
 import { shopService } from '../../services/shopService';
 import { productService } from '../../services/productService';
@@ -11,10 +13,22 @@ import Input from '../../components/Common/Input';
 const StockAdjust = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, currentShop } = useAuth();
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
 
   const shopId = watch('shop_id');
   const productId = watch('product_id');
+
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
   
   const { data: shops, isLoading: shopsLoading } = useQuery(
     'shops', 
@@ -33,7 +47,20 @@ const StockAdjust = () => {
     }
   );
 
-  const shopsList = shops?.data || [];
+  // Filter shops based on user role
+  const shopsList = useMemo(() => {
+    const allShops = shops?.data || [];
+    if (isAdminOrManager) {
+      return allShops;
+    } else {
+      // Staff can only see their shop
+      if (userShopId) {
+        return allShops.filter(shop => shop.id === userShopId);
+      }
+      return [];
+    }
+  }, [shops, isAdminOrManager, userShopId]);
+
   const productsList = products?.data || [];
   const { data: currentStock } = useQuery(
     ['stock', shopId, productId],
@@ -75,7 +102,30 @@ const StockAdjust = () => {
             <select id="shop_id" disabled className="warning" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
               <option>No shops available</option>
             </select>
+          ) : !isAdminOrManager && userShopId ? (
+            // Staff sees their shop only (disabled)
+            <select
+              id="shop_id"
+              {...register('shop_id', { required: 'Shop is required' })}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                backgroundColor: '#f9fafb',
+                cursor: 'not-allowed'
+              }}
+            >
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
           ) : (
+            // Admin/Manager can select shop
             <select
               id="shop_id"
               {...register('shop_id', { required: 'Shop is required' })}

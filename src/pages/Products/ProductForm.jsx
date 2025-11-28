@@ -26,21 +26,7 @@ const ProductForm = ({ productId, onSuccess, onCancel, isModal = false }) => {
     () => categoryService.getAll({ page: 1, limit: 100, status: 'active' }),
     { 
       staleTime: 5 * 60 * 1000,
-      retry: 2,
-      onSuccess: (data) => {
-        console.log('✅ Categories loaded in ProductForm:', data);
-        console.log('📦 Categories response structure:', {
-          success: data?.success,
-          message: data?.message,
-          dataType: Array.isArray(data?.data) ? 'array' : typeof data?.data,
-          dataLength: Array.isArray(data?.data) ? data.data.length : 'N/A',
-          dataSample: Array.isArray(data?.data) ? data.data[0] : data?.data
-        });
-        console.log('📦 Categories array:', data?.data || []);
-      },
-      onError: (error) => {
-        console.error('❌ Error loading categories in ProductForm:', error);
-      }
+      retry: 2
     }
   );
 
@@ -59,17 +45,6 @@ const ProductForm = ({ productId, onSuccess, onCancel, isModal = false }) => {
       categories = Array.isArray(categoriesData.data) ? categoriesData.data : [];
     }
   }
-  
-  // Log categories for debugging
-  React.useEffect(() => {
-    console.log('🔍 ProductForm - Categories Debug:', {
-      categoriesData,
-      categories,
-      categoriesLength: categories.length,
-      isLoading: categoriesLoading,
-      error: categoriesError
-    });
-  }, [categoriesData, categories, categoriesLoading, categoriesError]);
 
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
     defaultValues: {
@@ -91,7 +66,6 @@ const ProductForm = ({ productId, onSuccess, onCancel, isModal = false }) => {
         default_min_stock_level: product.data.default_min_stock_level ?? 0,
       };
       reset(productData);
-      console.log('📦 Product form reset with data:', productData);
     }
   }, [product, reset]);
 
@@ -105,7 +79,6 @@ const ProductForm = ({ productId, onSuccess, onCancel, isModal = false }) => {
       }, {
         keepDefaultValues: false
       });
-      console.log('✅ Category pre-selected after categories loaded:', categoryIdString);
     }
   }, [product, categories, selectedCategoryId, reset]);
 

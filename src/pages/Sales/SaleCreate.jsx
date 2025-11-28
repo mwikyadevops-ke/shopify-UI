@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useEffect, useMemo, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { saleService } from '../../services/saleService';
 import { shopService } from '../../services/shopService';
 import { productService } from '../../services/productService';
@@ -15,6 +16,7 @@ import './SaleCreate.css';
 const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, currentShop } = useAuth();
   const { register, handleSubmit, control, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
       shop_id: '',
@@ -38,26 +40,42 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
   // Store payment data temporarily to use after sale creation
   const pendingPaymentData = useRef(null);
 
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
+
   const { data: shops } = useQuery('shops', () => shopService.getAll({ limit: 100 }));
+
+  // Filter shops based on user role
+  const shopsList = useMemo(() => {
+    const allShops = shops?.data || [];
+    if (isAdminOrManager) {
+      return allShops;
+    } else {
+      // Staff can only see their shop
+      if (userShopId) {
+        return allShops.filter(shop => shop.id === userShopId);
+      }
+      return [];
+    }
+  }, [shops, isAdminOrManager, userShopId]);
+
+  // Auto-set shop_id for staff on mount
+  useEffect(() => {
+    if (!isAdminOrManager && userShopId && !shopId) {
+      setValue('shop_id', String(userShopId));
+    }
+  }, [isAdminOrManager, userShopId, shopId, setValue]);
   const { data: productsData, isLoading: productsLoading, error: productsError } = useQuery(
     'products',
-    () => productService.getAll({ limit: 100 }),
-    {
-      onSuccess: (data) => {
-        console.log('📦 Products response in SaleCreate:', data);
-        console.log('📦 Products data structure:', {
-          success: data?.success,
-          hasData: !!data?.data,
-          dataType: Array.isArray(data?.data) ? 'array' : typeof data?.data,
-          dataLength: Array.isArray(data?.data) ? data.data.length : 'N/A',
-          isDirectArray: Array.isArray(data),
-          directLength: Array.isArray(data) ? data.length : 'N/A',
-        });
-      },
-      onError: (error) => {
-        console.error('❌ Error loading products in SaleCreate:', error);
-      }
-    }
+    () => productService.getAll({ limit: 100 })
   );
 
   // Extract products array from response (handle different response structures)
@@ -214,7 +232,6 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
             }
           });
 
-          console.log('💰 Processing payment after sale creation:', paymentPayload);
           // Clear the ref
           pendingPaymentData.current = null;
           paymentMutation.mutate(paymentPayload);
@@ -279,9 +296,6 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
         delete saleData[key];
       }
     });
-
-    console.log('📦 Sale create data:', saleData);
-    console.log('💰 Payment data:', pendingPaymentData.current);
     
     // Create sale - payment will be processed automatically in onSuccess
     saleMutation.mutate(saleData);
@@ -301,14 +315,38 @@ const SaleCreate = ({ isModal = false, onSuccess, onCancel }) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form-group">
           <label>Shop</label>
-          <select {...register('shop_id', { required: 'Shop is required' })}>
-            <option value="">Select Shop</option>
-            {shops?.data?.map((shop) => (
-              <option key={shop.id} value={shop.id}>
-                {shop.name}
-              </option>
-            ))}
-          </select>
+          {!isAdminOrManager && userShopId ? (
+            // Staff sees their shop only (disabled)
+            <select 
+              {...register('shop_id', { required: 'Shop is required' })}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                backgroundColor: '#f9fafb',
+                cursor: 'not-allowed'
+              }}
+            >
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            // Admin/Manager can select shop
+            <select {...register('shop_id', { required: 'Shop is required' })}>
+              <option value="">Select Shop</option>
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <Input label="Customer Name" {...register('customer_name')} />
         <Input label="Customer Email" type="email" {...register('customer_email')} />

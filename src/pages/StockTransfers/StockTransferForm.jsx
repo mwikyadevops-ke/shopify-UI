@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useForm } from 'react-hook-form';
+import { useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { stockTransferService } from '../../services/stockTransferService';
 import { shopService } from '../../services/shopService';
 import { productService } from '../../services/productService';
@@ -11,7 +13,19 @@ import Input from '../../components/Common/Input';
 const StockTransferForm = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, currentShop } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm();
+
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
 
   const { data: shops, isLoading: shopsLoading } = useQuery(
     'shops', 
@@ -30,7 +44,20 @@ const StockTransferForm = () => {
     }
   );
 
-  const shopsList = shops?.data || [];
+  // Filter shops based on user role
+  const shopsList = useMemo(() => {
+    const allShops = shops?.data || [];
+    if (isAdminOrManager) {
+      return allShops;
+    } else {
+      // Staff can only see their shop
+      if (userShopId) {
+        return allShops.filter(shop => shop.id === userShopId);
+      }
+      return [];
+    }
+  }, [shops, isAdminOrManager, userShopId]);
+
   const productsList = products?.data || [];
 
   const mutation = useMutation(stockTransferService.create, {
@@ -62,7 +89,30 @@ const StockTransferForm = () => {
             <select id="from_shop_id" disabled className="warning" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
               <option>No shops available</option>
             </select>
+          ) : !isAdminOrManager && userShopId ? (
+            // Staff sees their shop only (disabled)
+            <select
+              id="from_shop_id"
+              {...register('from_shop_id', { required: 'From shop is required' })}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                backgroundColor: '#f9fafb',
+                cursor: 'not-allowed'
+              }}
+            >
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
           ) : (
+            // Admin/Manager can select shop
             <select
               id="from_shop_id"
               {...register('from_shop_id', { required: 'From shop is required' })}
@@ -98,7 +148,30 @@ const StockTransferForm = () => {
             <select id="to_shop_id" disabled className="warning" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
               <option>No shops available</option>
             </select>
+          ) : !isAdminOrManager && userShopId ? (
+            // Staff sees their shop only (disabled)
+            <select
+              id="to_shop_id"
+              {...register('to_shop_id', { required: 'To shop is required' })}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                backgroundColor: '#f9fafb',
+                cursor: 'not-allowed'
+              }}
+            >
+              {shopsList.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
           ) : (
+            // Admin/Manager can select shop
             <select
               id="to_shop_id"
               {...register('to_shop_id', { required: 'To shop is required' })}

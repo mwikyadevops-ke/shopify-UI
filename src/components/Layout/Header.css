@@ -30,6 +30,14 @@
   gap: 8px;
 }
 
+.user-info button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
 .user-role {
   color: #7f8c8d;
   font-size: 14px;

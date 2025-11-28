@@ -31,12 +31,18 @@ const ResetPassword = () => {
       return;
     }
 
+    // Validate passwords match before submitting
+    if (data.password !== data.passwordConfirmation) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
     try {
+      // API expects: { token, newPassword }
       const response = await authService.resetPassword(
         token,
-        data.password,
-        data.passwordConfirmation
+        data.password
       );
       if (response.success) {
         toast.success('Password reset successfully!');

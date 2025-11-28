@@ -194,8 +194,31 @@ const Header = ({ onMenuToggle, isMobile = false }) => {
             </div>
           )}
           <div className="user-info">
-            <span>{user?.full_name || user?.username || 'User'}</span>
-            <span className="user-role">({user?.role})</span>
+            <button
+              onClick={() => navigate('/profile')}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+              title="View Profile"
+            >
+              <span>👤</span>
+              <span>{user?.full_name || user?.username || 'User'}</span>
+              <span className="user-role">({user?.role})</span>
+            </button>
           </div>
           <button onClick={handleLogout} className="logout-btn">
             Logout

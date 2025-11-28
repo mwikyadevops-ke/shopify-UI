@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
-// 'http://localhost:8000/api'||
-'https://shopifyapi.optusconnect.co.ke/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://shopifyapi.optusconnect.co.ke/api';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -42,18 +40,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Log outgoing requests for debugging
-    console.log('📤 API Request:', {
-      method: config.method?.toUpperCase(),
-      url: config.url,
-      baseURL: config.baseURL,
-      data: config.data,
-      headers: { ...config.headers, Authorization: config.headers.Authorization ? 'Bearer ***' : undefined }
-    });
     return config;
   },
   (error) => {
-    console.error('❌ Request Interceptor Error:', error);
     return Promise.reject(error);
   }
 );
@@ -61,31 +50,10 @@ api.interceptors.request.use(
 // Response interceptor to handle errors and token refresh
 api.interceptors.response.use(
   (response) => {
-    // Log successful responses for debugging
-    console.log('✅ API Success:', response.config.method?.toUpperCase(), response.config.url, response.status);
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
-
-    // Log errors for debugging
-    if (error.response) {
-      console.error('❌ API Error:', {
-        method: error.config?.method?.toUpperCase(),
-        url: error.config?.url,
-        status: error.response.status,
-        statusText: error.response.statusText,
-        data: error.response.data,
-        fullError: error.response
-      });
-    } else if (error.request) {
-      console.error('❌ API Request Error (No Response):', {
-        url: error.config?.url,
-        message: 'Network error - no response received'
-      });
-    } else {
-      console.error('❌ API Error:', error.message);
-    }
 
     // Handle 401 errors - attempt token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -128,7 +96,6 @@ api.interceptors.response.use(
 
       if (!refreshToken) {
         // No refresh token available, redirect to login
-        console.warn('⚠️ No refresh token found, redirecting to login');
         isRefreshing = false;
         processQueue(error, null);
         localStorage.removeItem('token');
@@ -171,7 +138,6 @@ api.interceptors.response.use(
         }
       } catch (refreshError) {
         // Refresh failed, clear storage and redirect
-        console.error('❌ Token refresh failed:', refreshError);
         isRefreshing = false;
         processQueue(refreshError, null);
         localStorage.removeItem('token');

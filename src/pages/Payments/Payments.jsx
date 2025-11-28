@@ -1,18 +1,36 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { paymentService } from '../../services/paymentService';
 import DataTable from '../../components/Common/DataTable';
 import Button from '../../components/Common/Button';
 
 const Payments = () => {
   const navigate = useNavigate();
+  const { user, currentShop } = useAuth();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
+
   const { data, isLoading } = useQuery(
-    ['payments', page],
-    () => paymentService.getAll({ page, limit: 10 })
+    ['payments', page, userShopId],
+    () => paymentService.getAll({ 
+      page, 
+      limit: 10,
+      // Staff only sees their shop's payments
+      ...(!isAdminOrManager && userShopId && { shop_id: userShopId })
+    })
   );
 
   // Client-side filtering for search

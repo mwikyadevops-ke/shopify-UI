@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useAuth } from '../../context/AuthContext';
 import { shopService } from '../../services/shopService';
 import toast from 'react-hot-toast';
 import DataTable from '../../components/Common/DataTable';
@@ -9,12 +10,19 @@ import ShopForm from './ShopForm';
 
 const Shops = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [showModal, setShowModal] = useState(false);
   const [editingShopId, setEditingShopId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Check if user is admin (only admin can add shops)
+  const isAdmin = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin';
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -144,7 +152,9 @@ const Shops = () => {
     <div className="page-container">
       <div className="page-header">
         <h1>Shops</h1>
-        <Button onClick={handleAdd}>+ Add Shop</Button>
+        {isAdmin && (
+          <Button onClick={handleAdd}>+ Add Shop</Button>
+        )}
       </div>
       <DataTable
         data={filteredData}

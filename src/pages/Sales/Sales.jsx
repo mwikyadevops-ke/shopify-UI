@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { saleService } from '../../services/saleService';
 import DataTable from '../../components/Common/DataTable';
 import Button from '../../components/Common/Button';
@@ -10,6 +11,7 @@ import './Sales.css';
 
 const Sales = () => {
   const navigate = useNavigate();
+  const { user, currentShop } = useAuth();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,12 +26,25 @@ const Sales = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Check if user is admin or manager
+  const isAdminOrManager = useMemo(() => {
+    const userRole = user?.role?.toLowerCase();
+    return userRole === 'admin' || userRole === 'manager';
+  }, [user]);
+
+  // Get user's shop ID
+  const userShopId = useMemo(() => {
+    return user?.shop_id || currentShop?.id || null;
+  }, [user, currentShop]);
+
   const { data, isLoading } = useQuery(
-    ['sales', page, statusFilter],
+    ['sales', page, statusFilter, userShopId],
     () => saleService.getAll({ 
       page, 
       limit: 10,
-      ...(statusFilter && { status: statusFilter })
+      ...(statusFilter && { status: statusFilter }),
+      // Staff only sees their shop's sales
+      ...(!isAdminOrManager && userShopId && { shop_id: userShopId })
     }),
     {}
   );
