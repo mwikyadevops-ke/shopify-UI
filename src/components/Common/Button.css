@@ -54,6 +54,79 @@
   font-size: 12px;
 }
 
+.btn-icon {
+  padding: 6px 8px;
+  font-size: 14px;
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.btn-icon-only {
+  padding: 6px;
+  font-size: 16px;
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.btn-icon-only:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon-only.btn-primary {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-icon-only.btn-primary:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-icon-only.btn-danger {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.btn-icon-only.btn-danger:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-icon-only.btn-secondary {
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.btn-icon-only.btn-secondary:hover {
+  background-color: #6b7280;
+  color: white;
+}
+
+.btn-icon-only:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Actions column styling */
+.actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .btn {
@@ -66,6 +139,13 @@
     padding: 8px 12px;
     font-size: 13px;
     min-height: 36px;
+  }
+
+  .btn-icon-only {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 }
 
@@ -80,6 +160,13 @@
   .btn-small {
     padding: 8px 12px;
     min-height: 36px;
+  }
+
+  .btn-icon-only {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }
 

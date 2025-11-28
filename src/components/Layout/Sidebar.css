@@ -90,8 +90,46 @@
     width: 260px;
   }
 
+  .sidebar-header {
+    padding: 14px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 17px;
+  }
+
   .nav-item {
-    padding: 12px 16px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .sidebar-header {
+    padding: 12px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 16px;
+  }
+
+  .nav-item {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .nav-icon {
+    font-size: 16px;
+    margin-right: 8px;
   }
 }
 

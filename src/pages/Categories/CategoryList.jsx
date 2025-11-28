@@ -107,22 +107,22 @@ const CategoryList = () => {
             render: (value, row) => {
                 if (!row || !row.id) return null;
                 return (
-                    <div className="flex gap-2">
-                        <Button 
-                            variant="primary" 
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button
                             onClick={() => handleEdit(row)}
-                            size="small"
+                            className="btn-icon-only btn-secondary"
+                            title="Edit"
                         >
-                            Edit
-                        </Button>
-                        <Button 
-                            variant="danger" 
+                            ✏️
+                        </button>
+                        <button
                             onClick={() => handleDelete(row.id)}
-                            size="small"
-                            loading={deleteMutation.isLoading && deleteMutation.variables === row.id}
+                            className="btn-icon-only btn-danger"
+                            title="Delete"
+                            disabled={deleteMutation.isLoading && deleteMutation.variables === row.id}
                         >
-                            Delete
-                        </Button>
+                            {deleteMutation.isLoading && deleteMutation.variables === row.id ? '⏳' : '🗑️'}
+                        </button>
                     </div>
                 );
             },

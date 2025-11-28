@@ -257,40 +257,124 @@
   }
 
   .data-table-wrapper {
-    overflow-x: visible;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
   }
 
+  /* Compact table view for mobile */
   .data-table table {
-    display: none; /* Hide table on mobile */
+    font-size: 12px;
+    min-width: 500px;
+    width: 100%;
   }
 
-  /* Mobile Card View */
+  .data-table th,
+  .data-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .data-table th {
+    font-size: 10px;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Allow first two columns (username, email) to wrap if needed */
+  .data-table td:nth-child(1),
+  .data-table td:nth-child(2) {
+    white-space: normal;
+    max-width: 100px;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  /* Compact action buttons */
+  .data-table .actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .data-table .actions button,
+  .data-table .actions .btn-icon-only {
+    padding: 4px;
+    font-size: 12px;
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+  }
+
+  /* Mobile Card View - Hidden by default, shown when mobileView='cards' */
   .data-table-mobile-cards {
+    display: none;
+    padding: 8px;
+  }
+
+  /* Show cards only when explicitly enabled */
+  .data-table.show-cards-mobile .data-table-mobile-cards {
     display: block;
-    padding: 12px;
+  }
+
+  .data-table.show-cards-mobile .data-table-wrapper {
+    display: none;
   }
 
   .data-table-mobile-card {
     background: white;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .data-table-mobile-card:last-child {
     margin-bottom: 0;
   }
 
+  .mobile-card-header {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .mobile-card-header-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  .mobile-card-header-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
   .mobile-card-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #f3f4f6;
-    gap: 16px;
+    gap: 12px;
+    min-height: 32px;
   }
 
   .mobile-card-row:last-child {
@@ -300,38 +384,41 @@
   }
 
   .mobile-card-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     flex-shrink: 0;
-    min-width: 100px;
+    min-width: 70px;
+    max-width: 80px;
   }
 
   .mobile-card-value {
-    font-size: 14px;
+    font-size: 13px;
     color: #111827;
     text-align: right;
     flex: 1;
     word-break: break-word;
+    font-weight: 500;
+    line-height: 1.4;
   }
 
   .mobile-card-actions {
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    padding-top: 12px;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid #f3f4f6;
   }
 
   .mobile-card-actions button,
   .mobile-card-actions a {
     flex: 1;
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 12px;
     font-weight: 500;
-    border-radius: 6px;
+    border-radius: 5px;
     border: 1px solid #d1d5db;
     background: white;
     cursor: pointer;
@@ -340,10 +427,19 @@
     text-decoration: none;
     color: #374151;
     display: inline-block;
-    min-height: 44px;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .mobile-card-actions .btn-icon-only {
+    flex: 0 0 auto;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 14px;
   }
 
   .mobile-card-actions button:hover,
@@ -391,31 +487,85 @@
 }
 
 @media (max-width: 480px) {
+  /* Compact table for very small screens */
+  .data-table table {
+    font-size: 11px;
+    min-width: 450px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+
+  .data-table th {
+    font-size: 9px;
+  }
+
+  .data-table td:nth-child(1),
+  .data-table td:nth-child(2) {
+    max-width: 80px;
+  }
+
+  .data-table .actions button {
+    padding: 3px 6px;
+    font-size: 9px;
+    min-height: 24px;
+  }
+
   .data-table-mobile-cards {
-    padding: 8px;
+    padding: 6px;
   }
 
   .data-table-mobile-card {
-    padding: 12px;
+    padding: 8px 10px;
+    border-radius: 5px;
+  }
+
+  .mobile-card-header {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .mobile-card-header-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .mobile-card-header-value {
+    font-size: 14px;
   }
 
   .mobile-card-row {
-    flex-direction: column;
-    align-items: flex-start;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    min-height: 28px;
+    gap: 10px;
+  }
+
+  .mobile-card-label {
+    font-size: 10px;
+    min-width: 60px;
+    max-width: 70px;
   }
 
   .mobile-card-value {
-    text-align: left;
-    margin-left: 0;
-    margin-top: 4px;
+    font-size: 12px;
+    text-align: right;
   }
 
   .mobile-card-actions {
-    flex-direction: column;
+    margin-top: 8px;
+    padding-top: 8px;
+    gap: 4px;
   }
 
-  .mobile-card-actions button {
-    width: 100%;
+  .mobile-card-actions button,
+  .mobile-card-actions a {
+    padding: 6px 10px;
+    font-size: 11px;
+    min-height: 32px;
   }
 
   .pagination-controls {
@@ -423,8 +573,8 @@
   }
 
   .pagination-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-    min-width: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+    min-width: 36px;
   }
 }

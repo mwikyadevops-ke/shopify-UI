@@ -38,26 +38,64 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .input-group {
+    margin-bottom: 12px;
+  }
+
   .input-group input {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px 14px;
-    min-height: 44px; /* Better touch target */
+    font-size: 15px;
+    padding: 9px 11px;
+    min-height: 40px;
   }
 
   .input-group label {
-    font-size: 14px;
-    margin-bottom: 6px;
+    font-size: 13px;
+    margin-bottom: 4px;
   }
 
   .error-message {
-    font-size: 12px;
-    margin-top: 4px;
+    font-size: 11px;
+    margin-top: 3px;
   }
 }
 
 @media (max-width: 480px) {
+  .input-group {
+    margin-bottom: 10px;
+  }
+
   .input-group input {
-    padding: 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  .input-group label {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .error-message {
+    font-size: 11px;
+    margin-top: 3px;
   }
 }
+
+@media (max-width: 360px) {
+  .input-group {
+    margin-bottom: 8px;
+  }
+
+  .input-group input {
+    font-size: 16px;
+    padding: 7px 9px;
+    min-height: 38px;
+  }
+
+  .input-group label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+}
+
 

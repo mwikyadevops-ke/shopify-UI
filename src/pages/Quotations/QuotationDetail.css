@@ -86,3 +86,81 @@
   color: #991b1b;
 }
 
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .quotation-detail-container {
+    padding: 0;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+  }
+
+  .info-label {
+    font-size: 12px;
+  }
+
+  .info-value {
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .quotation-table {
+    font-size: 12px;
+  }
+
+  .quotation-table th,
+  .quotation-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-row {
+    padding: 8px 0;
+  }
+
+  .info-label {
+    font-size: 11px;
+  }
+
+  .info-value {
+    font-size: 12px;
+  }
+
+  .quotation-table {
+    font-size: 11px;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .quotation-table th,
+  .quotation-table td {
+    padding: 6px 4px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .quotation-status-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .info-label,
+  .info-value {
+    font-size: 10px;
+  }
+
+  .quotation-table th,
+  .quotation-table td {
+    padding: 5px 3px;
+    font-size: 9px;
+  }
+}
+

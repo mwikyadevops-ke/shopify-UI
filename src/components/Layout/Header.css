@@ -211,6 +211,10 @@
     font-size: 16px;
   }
 
+  .header-content {
+    gap: 10px;
+  }
+
   .header-right {
     flex-direction: column;
     align-items: stretch;
@@ -221,19 +225,64 @@
   .quotations-badge-btn {
     width: 100%;
     justify-content: center;
+    min-height: 40px;
+    font-size: 13px;
   }
 
   .shop-selector-container {
     width: 100%;
   }
 
+  .shop-selector-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+  }
+
   .user-info {
     justify-content: center;
     padding: 8px 0;
+    font-size: 12px;
   }
 
   .logout-btn {
     width: 100%;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .mobile-menu-btn {
+    font-size: 20px;
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 8px 10px;
+  }
+
+  .header-left h1 {
+    font-size: 15px;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .alerts-badge-btn,
+  .quotations-badge-btn,
+  .logout-btn,
+  .shop-selector-btn {
+    min-height: 38px;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .user-info {
+    font-size: 11px;
   }
 }
 

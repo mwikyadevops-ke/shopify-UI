@@ -377,73 +377,67 @@ const Quotations = () => {
         const isCurrentQuotation = confirmModal.quotationId === row.id;
 
         return (
-          <div className="actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <Button 
-              onClick={() => navigate(`/quotations/${row.id}`)} 
-              variant="secondary" 
-              small
+          <div className="actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              onClick={() => navigate(`/quotations/${row.id}`)}
+              className="btn-icon-only btn-secondary"
+              title="View"
             >
-              View
-            </Button>
+              👁️
+            </button>
             {status === 'draft' && (
               <>
-                <Button 
-                  onClick={() => navigate(`/quotations/${row.id}/edit`)} 
-                  variant="secondary" 
-                  small
+                <button
+                  onClick={() => navigate(`/quotations/${row.id}/edit`)}
+                  className="btn-icon-only btn-secondary"
+                  title="Edit"
                 >
-                  Edit
-                </Button>
-                <Button 
-                  onClick={() => handleSend(row)} 
-                  variant="primary" 
-                  small
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleSend(row)}
+                  className="btn-icon-only btn-primary"
                   disabled={(isLoading && !isCurrentQuotation) || !row.supplier_email}
-                  loading={isLoading && isCurrentQuotation && sendMutation.isLoading}
                   title={!row.supplier_email ? 'Supplier email is required to send quotation' : 'Send quotation via email'}
                 >
-                  Send Email
-                </Button>
-                <Button 
-                  onClick={() => handleDelete(row)} 
-                  variant="danger" 
-                  small
+                  {isLoading && isCurrentQuotation && sendMutation.isLoading ? '⏳' : '📧'}
+                </button>
+                <button
+                  onClick={() => handleDelete(row)}
+                  className="btn-icon-only btn-danger"
                   disabled={isLoading && !isCurrentQuotation}
-                  loading={isLoading && isCurrentQuotation && deleteMutation.isLoading}
+                  title="Delete"
                 >
-                  Delete
-                </Button>
+                  {isLoading && isCurrentQuotation && deleteMutation.isLoading ? '⏳' : '🗑️'}
+                </button>
               </>
             )}
             {status === 'sent' && (
               <>
-                <Button 
-                  onClick={() => handleAccept(row)} 
-                  variant="primary" 
-                  small
+                <button
+                  onClick={() => handleAccept(row)}
+                  className="btn-icon-only btn-primary"
                   disabled={isLoading && !isCurrentQuotation}
-                  loading={isLoading && isCurrentQuotation && acceptMutation.isLoading}
+                  title="Accept"
                 >
-                  Accept
-                </Button>
-                <Button 
-                  onClick={() => handleReject(row)} 
-                  variant="danger" 
-                  small
+                  {isLoading && isCurrentQuotation && acceptMutation.isLoading ? '⏳' : '✅'}
+                </button>
+                <button
+                  onClick={() => handleReject(row)}
+                  className="btn-icon-only btn-danger"
                   disabled={isLoading && !isCurrentQuotation}
-                  loading={isLoading && isCurrentQuotation && rejectMutation.isLoading}
+                  title="Reject"
                 >
-                  Reject
-                </Button>
-                <Button 
-                  onClick={() => handleCancel(row)} 
-                  variant="secondary" 
-                  small
+                  {isLoading && isCurrentQuotation && rejectMutation.isLoading ? '⏳' : '❌'}
+                </button>
+                <button
+                  onClick={() => handleCancel(row)}
+                  className="btn-icon-only btn-secondary"
                   disabled={isLoading && !isCurrentQuotation}
-                  loading={isLoading && isCurrentQuotation && cancelMutation.isLoading}
+                  title="Cancel"
                 >
-                  Cancel
-                </Button>
+                  {isLoading && isCurrentQuotation && cancelMutation.isLoading ? '⏳' : '🚫'}
+                </button>
               </>
             )}
           </div>

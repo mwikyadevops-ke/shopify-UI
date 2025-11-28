@@ -3,13 +3,61 @@
   gap: 12px;
   margin-bottom: 20px;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .quotations-filters input {
   flex: 1;
+  min-width: 200px;
 }
 
 .quotations-filters select {
   min-width: 150px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .quotations-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .quotations-filters input,
+  .quotations-filters select {
+    width: 100%;
+    min-width: 100%;
+    font-size: 15px;
+    padding: 9px 11px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quotations-filters {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .quotations-filters input,
+  .quotations-filters select {
+    font-size: 16px;
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .quotations-filters {
+    gap: 6px;
+  }
+
+  .quotations-filters input,
+  .quotations-filters select {
+    font-size: 16px;
+    padding: 7px 9px;
+    min-height: 38px;
+  }
 }
 

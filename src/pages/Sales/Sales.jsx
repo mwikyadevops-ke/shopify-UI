@@ -184,16 +184,22 @@ const Sales = () => {
         const hasBalance = balanceDue > 0;
 
         return (
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <Button onClick={() => navigate(`/sales/${row.id}`)} small>View</Button>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button
+              onClick={() => navigate(`/sales/${row.id}`)}
+              className="btn-icon-only btn-secondary"
+              title="View"
+            >
+              👁️
+            </button>
             {hasBalance && (
-              <Button 
-                onClick={() => navigate(`/payments/new?sale_id=${row.id}`)} 
-                small
-                variant="primary"
+              <button
+                onClick={() => navigate(`/payments/new?sale_id=${row.id}`)}
+                className="btn-icon-only btn-primary"
+                title="Pay"
               >
-                Pay
-              </Button>
+                💰
+              </button>
             )}
           </div>
         );

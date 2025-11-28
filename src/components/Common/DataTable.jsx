@@ -14,7 +14,8 @@ const DataTable = ({
   defaultSort = null,
   searchable = false,
   onSearch = null,
-  searchPlaceholder = 'Search...'
+  searchPlaceholder = 'Search...',
+  mobileView = 'table' // 'table' or 'cards'
 }) => {
   const [sortConfig, setSortConfig] = useState(defaultSort || { key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(pagination?.page || 1);
@@ -150,7 +151,7 @@ const DataTable = ({
   );
 
   return (
-    <div className="data-table">
+    <div className={`data-table ${isMobile && mobileView === 'cards' ? 'show-cards-mobile' : ''}`}>
       {/* Toolbar - Always show to allow clearing search */}
       <div className="data-table-toolbar">
         {searchable && (
@@ -224,8 +225,8 @@ const DataTable = ({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="data-table-wrapper">
-            <table>
+          <div className="data-table-wrapper" style={isMobile && mobileView === 'table' ? {} : {}}>
+            <table style={isMobile && mobileView === 'table' ? { display: 'table' } : {}}>
               <thead>
                 <tr>
                   {columns.map((col) => {
@@ -292,56 +293,83 @@ const DataTable = ({
           </div>
 
           {/* Mobile Card View */}
-          {isMobile && (
+          {isMobile && mobileView === 'cards' && (
             <div className="data-table-mobile-cards">
-              {currentPageData.map((row, index) => (
-                <div key={row.id || index} className="data-table-mobile-card">
-                  {columns
-                    .filter(col => col.key !== 'actions')
-                    .map((col) => {
-                      const value = row[col.key];
-                      let displayValue;
-                      
-                      if (col.render) {
-                        const result = col.render(value, row);
-                        if (React.isValidElement(result)) {
-                          displayValue = result;
-                        } else if (result && typeof result === 'object') {
-                          displayValue = String(result);
-                        } else {
-                          displayValue = result || '-';
-                        }
-                      } else if (value && typeof value === 'object' && !React.isValidElement(value)) {
-                        displayValue = JSON.stringify(value);
-                      } else {
-                        displayValue = value != null ? value : '-';
-                      }
+              {currentPageData.map((row, index) => {
+                // Get the first column (usually most important like Name)
+                const firstCol = columns.find(col => col.key !== 'actions');
+                const firstColValue = firstCol ? (() => {
+                  const value = row[firstCol.key];
+                  if (firstCol.render) {
+                    const result = firstCol.render(value, row);
+                    if (React.isValidElement(result)) {
+                      return result;
+                    } else if (result && typeof result === 'object') {
+                      return String(result);
+                    }
+                    return result || '-';
+                  }
+                  return value != null ? value : '-';
+                })() : null;
 
-                      return (
-                        <div key={col.key} className="mobile-card-row">
-                          <div className="mobile-card-label">{col.label}</div>
-                          <div className="mobile-card-value">{displayValue}</div>
-                        </div>
-                      );
-                    })}
-                  
-                  {/* Actions */}
-                  {(() => {
-                    const actionsCol = columns.find(col => col.key === 'actions');
-                    if (actionsCol && actionsCol.render) {
-                      const actions = actionsCol.render(null, row);
-                      if (React.isValidElement(actions)) {
+                return (
+                  <div key={row.id || index} className="data-table-mobile-card">
+                    {/* First column as header */}
+                    {firstCol && firstColValue && (
+                      <div className="mobile-card-header">
+                        <div className="mobile-card-header-label">{firstCol.label}</div>
+                        <div className="mobile-card-header-value">{firstColValue}</div>
+                      </div>
+                    )}
+                    
+                    {/* Other columns */}
+                    {columns
+                      .filter(col => col.key !== 'actions' && col.key !== firstCol?.key)
+                      .map((col) => {
+                        const value = row[col.key];
+                        let displayValue;
+                        
+                        if (col.render) {
+                          const result = col.render(value, row);
+                          if (React.isValidElement(result)) {
+                            displayValue = result;
+                          } else if (result && typeof result === 'object') {
+                            displayValue = String(result);
+                          } else {
+                            displayValue = result || '-';
+                          }
+                        } else if (value && typeof value === 'object' && !React.isValidElement(value)) {
+                          displayValue = JSON.stringify(value);
+                        } else {
+                          displayValue = value != null ? value : '-';
+                        }
+
                         return (
-                          <div className="mobile-card-actions">
-                            {actions}
+                          <div key={col.key} className="mobile-card-row">
+                            <div className="mobile-card-label">{col.label}</div>
+                            <div className="mobile-card-value">{displayValue}</div>
                           </div>
                         );
+                      })}
+                    
+                    {/* Actions */}
+                    {(() => {
+                      const actionsCol = columns.find(col => col.key === 'actions');
+                      if (actionsCol && actionsCol.render) {
+                        const actions = actionsCol.render(null, row);
+                        if (React.isValidElement(actions)) {
+                          return (
+                            <div className="mobile-card-actions">
+                              {actions}
+                            </div>
+                          );
+                        }
                       }
-                    }
-                    return null;
-                  })()}
-                </div>
-              ))}
+                      return null;
+                    })()}
+                  </div>
+                );
+              })}
             </div>
           )}
 

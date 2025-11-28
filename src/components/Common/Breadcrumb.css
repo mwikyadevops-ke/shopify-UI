@@ -41,3 +41,37 @@
   user-select: none;
 }
 
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .breadcrumb {
+    margin-bottom: 12px;
+    padding: 10px 0;
+  }
+
+  .breadcrumb-item {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    margin-bottom: 10px;
+    padding: 8px 0;
+  }
+
+  .breadcrumb-list {
+    gap: 6px;
+  }
+
+  .breadcrumb-item {
+    font-size: 12px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .breadcrumb-item {
+    font-size: 11px;
+  }
+}
+

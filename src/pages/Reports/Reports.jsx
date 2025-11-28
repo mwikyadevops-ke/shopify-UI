@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { reportService } from '../../services/reportService';
 import DataTable from '../../components/Common/DataTable';
+import './Reports.css';
 
 const Reports = () => {
   const [reportType, setReportType] = useState('sales');

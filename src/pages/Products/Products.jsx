@@ -90,9 +90,21 @@ const Products = () => {
       render: (value, row) => {
         if (!row || !row.id) return null;
         return (
-          <div className="actions">
-            <Button onClick={() => handleEdit(row.id)} small>Edit</Button>
-            <Button onClick={() => handleDelete(row.id)} variant="danger" small>Delete</Button>
+          <div className="actions" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button
+              onClick={() => handleEdit(row.id)}
+              className="btn-icon-only btn-secondary"
+              title="Edit"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => handleDelete(row.id)}
+              className="btn-icon-only btn-danger"
+              title="Delete"
+            >
+              🗑️
+            </button>
           </div>
         );
       },

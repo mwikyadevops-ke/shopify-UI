@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://shopifyapi.optusconnect.co.ke/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+'http://localhost:8000/api'; 
 
+// 'https://shopifyapi.optusconnect.co.ke/api
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

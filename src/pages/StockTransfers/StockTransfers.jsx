@@ -265,52 +265,48 @@ const StockTransfers = () => {
         const useApprovalWorkflow = status === 'pending' && row.requires_approval === true;
         
         return (
-          <div className="actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
             {status === 'pending' && (
               <>
                 {/* Show Approve/Reject if approval workflow is required */}
                 {useApprovalWorkflow && typeof stockTransferService.approve === 'function' ? (
                   <>
-                    <Button 
-                      onClick={() => handleApprove(row)} 
-                      variant="primary" 
-                      small
+                    <button
+                      onClick={() => handleApprove(row)}
+                      className="btn-icon-only btn-primary"
                       disabled={isLoading && !isCurrentTransfer}
-                      loading={isLoading && isCurrentTransfer && approveMutation.isLoading}
+                      title="Approve"
                     >
-                      Approve
-                    </Button>
-                    <Button 
-                      onClick={() => handleReject(row)} 
-                      variant="danger" 
-                      small
+                      {isLoading && isCurrentTransfer && approveMutation.isLoading ? '⏳' : '✅'}
+                    </button>
+                    <button
+                      onClick={() => handleReject(row)}
+                      className="btn-icon-only btn-danger"
                       disabled={isLoading && !isCurrentTransfer}
-                      loading={isLoading && isCurrentTransfer && rejectMutation.isLoading}
+                      title="Reject"
                     >
-                      Reject
-                    </Button>
+                      {isLoading && isCurrentTransfer && rejectMutation.isLoading ? '⏳' : '❌'}
+                    </button>
                   </>
                 ) : (
                   <>
                     {/* Default: Complete/Cancel buttons */}
-                    <Button 
-                      onClick={() => handleComplete(row)} 
-                      variant="primary" 
-                      small
+                    <button
+                      onClick={() => handleComplete(row)}
+                      className="btn-icon-only btn-primary"
                       disabled={isLoading && !isCurrentTransfer}
-                      loading={isLoading && isCurrentTransfer && completeMutation.isLoading}
+                      title="Complete"
                     >
-                      Complete
-                    </Button>
-                    <Button 
-                      onClick={() => handleCancel(row)} 
-                      variant="danger" 
-                      small
+                      {isLoading && isCurrentTransfer && completeMutation.isLoading ? '⏳' : '✓'}
+                    </button>
+                    <button
+                      onClick={() => handleCancel(row)}
+                      className="btn-icon-only btn-danger"
                       disabled={isLoading && !isCurrentTransfer}
-                      loading={isLoading && isCurrentTransfer && cancelMutation.isLoading}
+                      title="Cancel"
                     >
-                      Cancel
-                    </Button>
+                      {isLoading && isCurrentTransfer && cancelMutation.isLoading ? '⏳' : '🚫'}
+                    </button>
                   </>
                 )}
               </>
@@ -318,24 +314,22 @@ const StockTransfers = () => {
             {/* Show Complete/Cancel for approved transfers */}
             {status === 'approved' && (
               <>
-                <Button 
-                  onClick={() => handleComplete(row)} 
-                  variant="primary" 
-                  small
+                <button
+                  onClick={() => handleComplete(row)}
+                  className="btn-icon-only btn-primary"
                   disabled={isLoading && !isCurrentTransfer}
-                  loading={isLoading && isCurrentTransfer && completeMutation.isLoading}
+                  title="Complete"
                 >
-                  Complete
-                </Button>
-                <Button 
-                  onClick={() => handleCancel(row)} 
-                  variant="danger" 
-                  small
+                  {isLoading && isCurrentTransfer && completeMutation.isLoading ? '⏳' : '✓'}
+                </button>
+                <button
+                  onClick={() => handleCancel(row)}
+                  className="btn-icon-only btn-danger"
                   disabled={isLoading && !isCurrentTransfer}
-                  loading={isLoading && isCurrentTransfer && cancelMutation.isLoading}
+                  title="Cancel"
                 >
-                  Cancel
-                </Button>
+                  {isLoading && isCurrentTransfer && cancelMutation.isLoading ? '⏳' : '🚫'}
+                </button>
               </>
             )}
           </div>

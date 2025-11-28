@@ -83,7 +83,11 @@ const Dashboard = () => {
   }, [stats]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="dashboard" style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '16px', color: '#6b7280' }}>Loading dashboard...</div>
+      </div>
+    );
   }
 
   const alertsCount = alertCount?.data?.count || alertCount?.count || 0;
@@ -183,9 +187,9 @@ const Dashboard = () => {
       {/* Draft Quotations Section (only for admin/manager) */}
       {canManageQuotations && draftQuotationsList.length > 0 && (
         <div className="draft-quotations-section" style={{ marginTop: '32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ margin: 0, color: '#d97706' }}>📄 Draft Quotations Pending Send</h2>
-            <Button onClick={() => navigate('/quotations?status=draft')} variant="secondary">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <h2 style={{ margin: 0, color: '#d97706', fontSize: '18px' }}>📄 Draft Quotations Pending Send</h2>
+            <Button onClick={() => navigate('/quotations?status=draft')} variant="secondary" style={{ fontSize: '14px', padding: '8px 16px' }}>
               View All
             </Button>
           </div>
@@ -202,23 +206,23 @@ const Dashboard = () => {
                 onClick={() => navigate(`/quotations/${quotation.id}`)}
               >
                 <div className="alert-content">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <strong>{quotation.quotation_number}</strong>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <strong style={{ fontSize: '14px' }}>{quotation.quotation_number}</strong>
                       {quotation.supplier_name && (
-                        <span style={{ color: '#6b7280', marginLeft: '8px' }}>• {quotation.supplier_name}</span>
+                        <span style={{ color: '#6b7280', marginLeft: '8px', fontSize: '13px' }}>• {quotation.supplier_name}</span>
                       )}
                     </div>
                     {quotation.shop_name && (
-                      <span style={{ color: '#6b7280', fontSize: '14px' }}>{quotation.shop_name}</span>
+                      <span style={{ color: '#6b7280', fontSize: '12px', whiteSpace: 'nowrap' }}>{quotation.shop_name}</span>
                     )}
                   </div>
-                  <div style={{ marginTop: '8px', fontSize: '14px', color: '#6b7280' }}>
-                    Amount: <strong style={{ color: '#d97706' }}>Ksh {parseFloat(quotation.total_amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                  <div style={{ marginTop: '8px', fontSize: '13px', color: '#6b7280', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <span>Amount: <strong style={{ color: '#d97706' }}>Ksh {parseFloat(quotation.total_amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
                     {quotation.supplier_email ? (
-                      <span style={{ marginLeft: '16px', color: '#059669' }}>✓ Email available</span>
+                      <span style={{ color: '#059669', fontSize: '12px' }}>✓ Email available</span>
                     ) : (
-                      <span style={{ marginLeft: '16px', color: '#dc2626' }}>⚠ No email</span>
+                      <span style={{ color: '#dc2626', fontSize: '12px' }}>⚠ No email</span>
                     )}
                   </div>
                 </div>
@@ -231,9 +235,9 @@ const Dashboard = () => {
       {/* Critical Alerts Section */}
       {criticalAlertsList.length > 0 && (
         <div className="critical-alerts-section" style={{ marginTop: '32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ margin: 0, color: '#dc2626' }}>Critical Stock Alerts</h2>
-            <Button onClick={() => navigate('/alerts?alert_level=critical')} variant="secondary">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <h2 style={{ margin: 0, color: '#dc2626', fontSize: '18px' }}>Critical Stock Alerts</h2>
+            <Button onClick={() => navigate('/alerts?alert_level=critical')} variant="secondary" style={{ fontSize: '14px', padding: '8px 16px' }}>
               View All
             </Button>
           </div>
@@ -241,18 +245,18 @@ const Dashboard = () => {
             {criticalAlertsList.slice(0, 5).map((alert, index) => (
               <div key={alert.id || index} className="alert-item critical">
                 <div className="alert-content">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <strong>{alert.product_name}</strong>
-                      {alert.sku && <span style={{ color: '#6b7280', marginLeft: '8px' }}>({alert.sku})</span>}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <strong style={{ fontSize: '14px' }}>{alert.product_name}</strong>
+                      {alert.sku && <span style={{ color: '#6b7280', marginLeft: '8px', fontSize: '13px' }}>({alert.sku})</span>}
                     </div>
                     {isAdminOrManager && alert.shop_name && (
-                      <span style={{ color: '#6b7280', fontSize: '14px' }}>{alert.shop_name}</span>
+                      <span style={{ color: '#6b7280', fontSize: '12px', whiteSpace: 'nowrap' }}>{alert.shop_name}</span>
                     )}
                   </div>
-                  <div style={{ marginTop: '8px', fontSize: '14px', color: '#6b7280' }}>
-                    Current: <strong style={{ color: '#dc2626' }}>{parseFloat(alert.current_quantity || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> | 
-                    Min Level: <strong>{parseFloat(alert.min_stock_level || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                  <div style={{ marginTop: '8px', fontSize: '13px', color: '#6b7280', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <span>Current: <strong style={{ color: '#dc2626' }}>{parseFloat(alert.current_quantity || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+                    <span>Min Level: <strong>{parseFloat(alert.min_stock_level || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
                   </div>
                 </div>
               </div>

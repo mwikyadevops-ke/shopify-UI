@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { shopService } from '../../services/shopService';
 import toast from 'react-hot-toast';
@@ -14,6 +14,15 @@ const Shops = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingShopId, setEditingShopId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { data, isLoading } = useQuery(
     ['shops', page, limit],
@@ -69,7 +78,7 @@ const Shops = () => {
     setEditingShopId(null);
   };
 
-  const columns = [
+  const allColumns = [
     { key: 'name', label: 'Name' },
     { key: 'location', label: 'Location' },
     { key: 'phone', label: 'Phone' },
@@ -92,14 +101,44 @@ const Shops = () => {
       render: (value, row) => {
         if (!row || !row.id) return null;
         return (
-          <div className="actions">
-            <Button onClick={() => handleEdit(row.id)} small>Edit</Button>
-            <Button onClick={() => handleDelete(row.id)} variant="danger" small>Delete</Button>
+          <div className="actions" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button
+              onClick={() => handleEdit(row.id)}
+              className="btn-icon-only btn-secondary"
+              title="Edit"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => handleDelete(row.id)}
+              className="btn-icon-only btn-danger"
+              title="Delete"
+            >
+              🗑️
+            </button>
           </div>
         );
       },
     },
   ];
+
+  // Filter columns for mobile - show only: Name, Location, Phone, Status
+  const columns = useMemo(() => {
+    if (isMobile) {
+      const mobileColumnOrder = ['name', 'location', 'phone', 'status', 'actions'];
+      const mobileColumns = [];
+      
+      mobileColumnOrder.forEach(key => {
+        const col = allColumns.find(c => c.key === key);
+        if (col) {
+          mobileColumns.push(col);
+        }
+      });
+      
+      return mobileColumns;
+    }
+    return allColumns;
+  }, [isMobile]);
 
   return (
     <div className="page-container">

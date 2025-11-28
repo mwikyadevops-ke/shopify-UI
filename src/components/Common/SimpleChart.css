@@ -71,16 +71,79 @@
 /* Responsive */
 @media (max-width: 768px) {
   .simple-chart {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .chart-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .chart-bars {
+    gap: 12px;
+  }
+
+  .chart-bar-item {
+    gap: 6px;
   }
 
   .chart-bar-label {
-    font-size: 12px;
-    min-width: 100px;
+    font-size: 11px;
+    min-width: 90px;
+  }
+
+  .chart-bar-container {
+    height: 28px;
+  }
+
+  .chart-bar-fill {
+    padding-right: 8px;
   }
 
   .chart-bar-value {
-    font-size: 11px;
+    font-size: 10px;
+  }
+
+  .chart-empty {
+    padding: 30px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .simple-chart {
+    padding: 10px;
+  }
+
+  .chart-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .chart-bars {
+    gap: 10px;
+  }
+
+  .chart-bar-label {
+    font-size: 10px;
+    min-width: 80px;
+  }
+
+  .chart-bar-container {
+    height: 24px;
+  }
+
+  .chart-bar-fill {
+    padding-right: 6px;
+  }
+
+  .chart-bar-value {
+    font-size: 9px;
+  }
+
+  .chart-empty {
+    padding: 20px;
+    font-size: 12px;
   }
 }
 
